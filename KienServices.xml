@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+   <service verb="response" noun="CertRequest" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="inValue" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="outValue"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                outValue = inValue + " is a man!"
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="response" noun="Sum" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="inValue" required="true" type="Integer" />
+            <parameter name="inValue1" required="true" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="outValue"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                outValue = inValue + inValue1
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="response" noun="Ptrinh" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="a" required="true" type="Float" />
+            <parameter name="b" required="true" type="Float"/>
+            <parameter name="c" required="true" type="Float"/>
+            <parameter name="y" required="true" type="Float"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="x" type="Float"/>
+            <parameter name="x1" type="Float"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import java.lang.Math;
+
+
+                    delta = b*b - 4*a*c
+                    if(delta < 0){
+                        x ="Phương trình vô nghiệm !"
+                    }
+                    else if(delta == 0){
+                        x = -b / 2*a
+                        x1 = x
+                    }
+                    else{
+                        x = (-b + Math.sqrt(delta)) / (2*a)
+                        x1 =(-b - Math.sqrt(delta)) / (2*a)
+
+                    }
+
+
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="response" noun="TakeOld" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="old" required="true" type="Integer" />
+
+        </in-parameters>
+        <out-parameters>
+            <parameter name="oldValue"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                if(old < 0)
+                    oldValue = "Nhập sai độ tuổi !"
+                else{
+                    if(old > 0 && old < 6){
+                        oldValue = "Trẻ sơ sinh"
+                        }
+                    else if(old > 6 && old < 16){
+                        oldValue = "Tuổi thiếu nhi"
+                    }
+                    else if(old > 16 && old < 30){
+                        oldValue = "Tuổi thanh niên"
+                    }
+                    else if(old > 30 && old < 60){
+                        oldValue = "Tuổi trung niên"
+                    }
+                    else if(old >60 && old < 80){
+                        oldValue = "Cao tuổi"
+                    }
+                }
+
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="response" noun="TakeInfor" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="maTinh" required="true" type="String" />
+
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tenTinh"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+            import java.io.File;
+            import java.io.FileNotFoundException;
+            import java.util.Scanner;
+            try{
+                File myFile = new File("C:\\Users\\Kien-PC\\Desktop\\province2.txt");
+                List<String> listOfStrings = new ArrayList<String>();
+                TreeMap<String, String> tree = new TreeMap<>();
+                FileReader fr = new FileReader(myFile);
+                String s = new String();
+                char ch;
+                while (fr.ready()) {
+                    ch = (char)fr.read();
+                    if (ch == '\n') {
+                        listOfStrings.add(s.toString());
+                        s = new String();
+                 }
+                    else {
+                        s += ch;
+                    }
+                }
+                if (s.length() > 0) {
+                    listOfStrings.add(s.toString());
+                }
+                String[] array = listOfStrings.toArray(new String[0]);
+                int cout = array.length-1;
+                String[] tach = new String[100];
+                String[] value = new String[50];
+                while(cout > 0){
+                    tach = array[cout].split(" ");
+                    value = array[cout].split(tach[tach.length-1]);
+                    tree.put(tach[tach.length-1],value[0]);
+                    cout--;
+                }
+                tenTinh = tree.get(maTinh)
+            }
+            catch(FileNotFoundException e){
+                e.getStackTrace()
+            }
+
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="response" noun="Call" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="inValue" required="true" type="Integer" />
+            <parameter name="inValue1" required="true" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="outValue"/>
+        </out-parameters>
+
+        <actions>
+
+            <service-call name="kienservice.KienServices.response#Sum" out-map="outValue"
+                          in-map="[inValue:inValue, inValue1:inValue1,  sum:'outValue']"/>
+            <script><![CDATA[
+
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="response" noun="CallAPI" authenticate="anonymous-all">
+        <in-parameters>
+
+        </in-parameters>
+        <out-parameters>
+            <parameter name="outValue"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                try{
+                URL url = new URL("https://api.openweathermap.org/data/2.5/weather?q=Hanoi&appid=e9d1dc7ee1f7119af1604fe8004b5a71");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.connect();
+                StringBuilder inforString = new StringBuilder();
+                Scanner scan = new Scanner(url.openStream());
+                while(scan.hasNext()){
+                    inforString.append(scan.nextLine());
+                    }
+                    scan.close();
+                    outValue = inforString
+                }catch(Exception e){
+                }
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="response" noun="Interface" authenticate="anonymous-all" type="interface">
+        <in-parameters>
+            <parameter name="inValue" required="true" type="Integer" />
+            <parameter name="inValue1" required="true" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="outValue"/>
+        </out-parameters>
+
+        <actions>
+
+            <script><![CDATA[
+
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="response" noun="SumTakeInterface" authenticate="anonymous-all">
+        <implements service="kienservice.KienServices.response#Interface"></implements>
+        <actions>
+            <service-call name="kienservice.KienServices.response#Sum" out-map="outValue"
+                          in-map="[inValue:inValue, inValue1:inValue1,  sum:'outValue']"/>
+            <script><![CDATA[
+
+            ]]></script>
+        </actions>
+    </service>
+</services>
